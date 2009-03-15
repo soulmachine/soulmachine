@@ -1,0 +1,74 @@
+﻿1. 缩进
+每次缩进8个空格。switch 是特例，为避免过度缩进，可以将switch和case 对齐。
+
+2. 阻止过长的行和字符串
+一行不要超过80字符。
+花括号：一般左括号放在行尾，右括号放在行首；函数是特例，要对齐放在行首。
+右括号应当单独占一行，除非后面跟有类似的语句，例如“do...while”和"if ... else if"：
+do {
+      body of do-loop
+   } while (condition);
+   
+和：
+   
+   if (x == y) {
+      ..
+   } else if (x > y) {
+      ...
+   } else {
+      ....
+   } 
+
+3. 空格
+大多数关键字后放一个空格，除了 sizeof, typeof,alignof，因为它们看起来像函数。
+小括号左右内部不要用空格。
+当定义一个指针或一个返回指针的函数，"*"应当靠近数据名和函数名。
+二元操作符两边一般加空格，一元操作符不需要。
+一行的末尾不要有多余的空格（某些编辑器会“智能地”在行尾添加空格）。
+
+4. 命名
+匈牙利命名法是一种脑残的命名法。
+
+5. typedef
+很多人认为typedef 能提高可读性，不是这样的，typedef 只是在下列情况下游泳：
+(a) 完全不透明的对象
+注意：不透明对象和访问函数本身不太好。我们需要它们的原因是对象里的确没有
+可移植的信息。
+
+6. 函数
+函数应当短而精美，只做一件事并且把它做好。
+一个函数的局部变量应该不超过5-10个。
+
+7. 将函数的出口集中起来
+尽管一些人反对 goto ，但是 goto 还是很有必要的。
+
+8. 注释
+注释是有用的，但过量的注释则是有害的。不要试图在注释中解释你的代码是如何工作的，
+代码会说明自己是如何工作的。
+
+Generally, you want your comments to tell WHAT your code does, not HOW.
+Also, try to avoid putting comments inside a function body: if the
+function is so complex that you need to separately comment parts of it,
+you should probably go back to chapter 6 for a while.  You can make
+small comments to note or warn about something particularly clever (or
+ugly), but try to avoid excess.  Instead, put the comments at the head
+of the function, telling people what it does, and possibly WHY it does
+it.
+
+It's also important to comment data, whether they are basic types or derived
+types.
+
+Chapter 12: Macros, Enums and RTL
+Names of macros defining constants and labels in enums are capitalized.
+Generally, inline functions are preferable to macros resembling functions.
+
+Macros with multiple statements should be enclosed in a do - while block
+
+
+
+Chapter 16: Function return values and names
+
+If the name of a function is an action or an imperative command,
+the function should return an error-code integer.  If the name
+is a predicate, the function should return a "succeeded" boolean
+

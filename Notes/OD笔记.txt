@@ -1,0 +1,108 @@
+字符串断点
+右击->查找->所有参考文本字串，右击->查找文本，在找到的字符串位置右击->反汇编窗口
+中跟随，右击->查找参考->选定地址，就可以看见代码中引用此字符串的所有位置了。
+
+函数断点
+右击->当前模块中的名称（标签）
+
+内存断点
+消息断电
+
+寻找OEP
+
+1.根据跨段指令寻找OEP
+壳的代码形式一般如下：
+ 
+PUSHFD ; 将标志寄存器入栈保存
+PUSHAD ; push eax, ecx, edx, ebx, esp, ebp, esi, edi
+…… ; 外壳代码部分
+POPAD ; pop edi, esi, ebp, esp, ebx, edx, ecx, eax
+POPFD ; 恢复标志寄存器
+JMP OEP ; 
+OEP: …… ; 解压后的程序原代码
+
+2.根据堆栈平衡原理找OEP
+操作方法：多数壳在运行到OEP的时候ESP=0012FFC4，这就是说程序的第一句是对0012FFC0
+进行写入操作，只要在0012FFC0下硬件写入断点（命令行里键入HW 12FFC0），我们就能停
+在OEP的第二句处。
+注意：并不是所有程序加载时，ESP的值是0012FFC4，这个值是什么由操作系统决定，将
+SizeOfStackCOmmit改大ESP就会变，这是因为操作系统从这个页向上找一个足够大地方当作
+stack了（感谢forgot解释）。你只要记住你系统加载时的ESP值，对其设断即可。
+
+3.根据编译语言特点找OEP
+
+4.用内存断点找OEP
+    硬件断点和普通断点（F2下断）是有本质区别的。硬件断点等效与SoftICE命令bpm，他
+的中断要用到DR0-DR7的调试寄存器，也就是说OD通过这些DR0-DR7的调试寄存器来判断是否
+断下。普通断点（F2下断）等效于bpx，他是在所执行的的代码的当前地址的一个字节修改
+为CC（int3）。当程序运行到int3的时候就会产生一个异常，而这个异常将交给OD处理，把
+这个异常的regEIP-1以后就正好停在了需要的中断的地方（这个根据系统不同会不一样），
+同时OD在把上面的int3修改回原来的代码。而内存断点基本上使用的是对代码使用的保护属
+性来实现中断。
+
+手动脱壳时，用Olldbg载入程序,脱壳程序里面会有有好多循环。对付循环时，只能让程序
+往前运行，基本不能让它往回跳，要想法跳出循环圈。不要用Peid查入口，单步跟踪，提高
+手动找入口能力。
+
+压缩壳：UPX ASPack PECompact EZIP JPack
+UPX手动脱壳
+方法1:
+    用OD装载EXE文件，右击->查找->命令，输入popad，就会定位到popad，下一行就可以看
+到jmp OEP.
+    UPX加壳后的文件大致框架是：
+
+pushad
+解压代码
+popad
+jmp OEP
+
+    所以popad可以作为寻找OEP的一个特征。
+
+方法2：
+    用OD装载EXE文件，用命令bp GetProcAddress对API下断点，按F9运行，按Ctrl+F9返回
+，向下几行就可以看到jmp OEP。
+    
+    dump时一定要停在OEP处，这时可以用OD自带的插件OllyDump。
+
+内存断电一定要先选择范围。
+
+ASPack脱壳
+    Aspack壳的加壳入口第一句是PUSHAD，和UPX几乎一样的,
+
+我们一般遇到Call,很近的Call用F7走.较远的Call用F8步过,我们以后会体会更深.
+
+Ctrl+A重新分析
+
+Aspack1.0803脱壳Api函数用了很多，重复使用频率也高。
+GetModuleHandleA 3次
+GetProcAddress 3次
+VirtualAlloc 2次
+kernel32.VirtualFree 2次
+想走捷径就用
+bp GetModuleHandleA 
+获取一个应用程序或动态链接库的模块句柄。脱壳时常用断点。
+bp GetProcAddress 
+获取一个指定输出动态链接库(函数)的地址,也是脱壳时常用断点。
+其中 GetProcAddress 不好下断点，不知何时应返回领空。
+bp GetModuleHandleA 下断点要好些。
+下断点，因这两个Api调用较多，在系统领空按CTRL+A返回程序领空，在下面附近可以找到
+Popad关键字，最后到入口Dump程序
+
+ASPack 跟UPX不一样，UPX是单纯的把原程序压缩，PUSHAD和POPAD中间部分是解压部分。而
+ASPack是连自己带原程序都压缩，解压一段运行一段，所以POPAD是一直要到最后一段被解
+压才出现，即我们只能一步一步跟。
+
+脱壳教程应先看看雪的前一部分，然后可以开始看二哥的十八篇教程了。
+
+PECompact手动脱壳
+    对于循环代码，其一般形式是
+loopstart:
+    ...
+    jmp jumout;跳出循环
+    ...
+jmp loopstart
+    ...
+jumout:
+    ...
+    运行到jmp loopstart，用F4到下一句来运行完循环有时无效，这是可以用另一种方法：
+在jmpout标签所指代码处下断点，按F9就会断在这里，就这样跳出循环了。

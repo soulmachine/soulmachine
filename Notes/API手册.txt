@@ -1,0 +1,439 @@
+﻿加密与解密第三版：
+int GetWindowText(hWnd,pString,nMaxCount);
+HWND GetDlgItem(hDlg,nID);
+UINT GetDlgItemText(hDlg,nID,pString,nMaxCount);
+UINT GetDlgItemInt(hDlg,nID,pTranslated,bSigned);
+int MessageBox(hWnd,pText,pCaption,uType);
+
+
+HMODULE LoadLibrary(pszFileName);
+
+FARPROC GetProcAddress(hModule,pszProcName);
+
+
+int CompareString(Locale,dwCmpFlags,lpString1,cchCount1,lpString2,cchCount2);
+CompareString(LOCALE_USER_DEFAULT,NORM_IGNORECASE,lpString1,cchCount1,
+        lpString2,cchCount2);    CSTR_EQUAL
+
+
+BOOL OpenProcessToken(hProcess,dwDesiredAccess,phToken);
+OpenProcessToken(GetCurrentProcess(),
+                               TOKEN_QUERY | TOKEN_ADJUST_PRIVILEGES,&hToken);
+
+
+BOOL LookupPrivilegeValue(pSystemName,pName,pLuid);
+LookupPrivilegeValue(NULL,SE_SHUTDOWN_NAME,&tkp.Privileges[0].Luid);
+
+BOOL AdjustTokenPrivileges(hToken,bDisableAllPrivileges,pNewState,
+                                  dwBufferLength,pPreviousState,pReturnLength);
+     AdjustTokenPrivileges(hToken,FALSE,&newState,0,NULL,NULL);
+
+
+LONG RegCreateKeyEx(hKey,pszSubKey,dwReserved,pClass,dwOptions,samDesired,
+                                 psa,phkResult,pdwDisposition);
+     RegCreateKeyEx(HKEY_CURRENT_USER,pszSubKey,0,NULL,REG_OPTION_NON_VOLATILE,
+                                 KEY_ALL_ACCESS,NULL,&hkResult,NULL);
+                                 
+LONG RegSetValueEx(hKey, pszValueName, dwReserved,dwType, pData, cbData);
+     RegSetValueEx(hKey, pszValueName, 0, REG_SZ, pData, cbData);
+
+LONG RegOpenKeyEx(hKey,pSubKey,dwOptions,samDisired,phkResult);
+     RegOpenKeyEx(HKEY_CURRENT_USER,pSubKey,0,KEY_ALL_ACCESS,phkResult);
+     
+LONG RegQueryValueEx(hKey, pszValueName, pReserved, pdwType, pData, pcbData);
+     RegQueryValueEx(hKey, pszValueName, NULL, pdwType, pData, pcbData);
+
+LONG RegSaveKey(hKey,pFile,pSecurityAttributes);
+     RegSaveKey(hKey,pFile,NULL);
+
+LONG RegRestoreKey(hKey,pFile,dwFlags);
+     RegRestoreKey(hKey,pFile,REG_FORCE_RESTORE);
+
+LONG RegCloseKey(hKey);
+
+
+HANDLE CreateFileMapping(hFile,pSecurityAttributes,dwProtect,dwMaximumSizeHigh,
+                                                       dwMaximumSizeLow,pName);
+     CreateFileMapping(INVALID_HANDLE_VALUE,NULL,PAGE_READWRITE,0,0x100,pName);
+     
+LPVOID MapViewOfFile(hFileMappingObject,dwDesiredAccess,dwFileOffsetHigh,
+                                         dwFileOffsetLow,dwNumberOfBytesToMap);
+       MapViewOfFile(hFileMappingObject,FILE_MAP_ALL_ACCESS,0,0,0x100);
+
+
+BOOL CreateProcess(pszApplicationName,pszCommandLine,pProcessAttributes,
+                  pThreadAttributes,bInheritable,dwCreationFlags,pvEnvironment,
+                         pszCurrentDirectory,pStartupInfo,pProcessInformation);
+CreateProcess(NULL,"cmd",NULL,NULL,FALSE,CREATE_NEW_CONSOLE,NULL,NULL,&si,&pi);
+
+HANDLE CreateToolhelp32Snapshot(dwFlags,dwProcessID);
+CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
+
+BOOL Process32First(hSnapshot,ppe);
+BOOL Process32Next(hSnapshot,ppe);
+BOOL Thread32First(hSnapshot,pte);
+BOOL Thread32Next(hSnapshot,pte);
+
+VOID ExitProcess(uExitCode);
+BOOL TerminateProcess(hProcess,uExitCode);
+BOOL GetExitCodeProcess(hProcess,pExitCode);
+
+HANDLE OpenProcess(dwDesiredAccess,bInheritable,dwProcessId);
+       OpenProcess(PROCESS_ALL_ACCESS,FALSE,dwProcessId);
+
+BOOL SetPriorityClass(hProcess, dwPriorityClass);
+
+
+
+HANDLE CreateThread(pThreadAttributes,,dwStackSize,pThreadProc,
+                                         pvParameter,dwCreationFlags,pdwThreadId);
+       CreateThread(NULL,0,pThreadProc,NULL,0,NULL);
+
+HANDLE CreateRemoteThread(hProcess,pThreadAttributes,dwStackSize,pThreadProc,
+                                         pvParameter,dwCreationFlags,pdwThreadId);
+
+DWORD ThreadProc(pvParameter);
+
+BOOL SetThreadPriority(hThread,nPriority);
+
+HANDLE OpenThread(dwDesiredAccess,bInheritable,dwThreadId);
+       OpenThread(THREAD_ALL_ACCESS,FALSE,dwThreadId);
+
+DWORD SuspendThread(hThread);
+DWORD ResumeThread(hThread);
+
+VOID ExitThread(dwExitCode);
+BOOL TerminateThread(hThread,dwExitCode);
+BOOL GetExitCodeThread(hThread,pExitCode);
+
+
+BOOL WINAPI DllMain(HINSTANCE hInstanceDll,DWORD dwReason,PVOID pvReserved)
+{
+    switch(dwReason)
+    {
+    //进程启动时隐式加载DLL或通过LoadLibrary显示加载DLL
+    case DLL_PROCESS_ATTACH:
+        break;
+    //进程创建了一个新线程
+    case DLL_THREAD_ATTACH:
+        break;
+    //进程的某个线程终止
+    case DLL_THREAD_DETACH:
+        break;
+    //进程结束
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
+}
+
+
+HHOOK SetWindowsHookEx(nHookType,pHookProc,hModule,dwThreadId);
+
+LRESULT CALLBACK HookProc(nCode,wParam,lParam)
+{
+    //处理消息的代码
+    //...
+    return ::CallNextHookEx(nCode,wParam,lParam);
+}
+
+BOOL UnhookWindowsHookEx(hHook);
+
+SIZE_T VirtualQuery(pAddress,pmbi,dwLength);
+
+
+
+UINT GetWindowsDirectory(pBuffer,uSize);
+UINT GetSystemDirectory(pBuffer,uSize);
+
+DWORD GetShortPathName(pszLongPath,pszShortPath,cchBuffer);
+
+DWORD GetModuleFileName(hModule,pFileName,uSize);
+      GetModuleFileName(NULL,pFileName,MAX_PATH);
+
+
+
+HWND FindWindow(pszClassName,pszWindowName);
+     FindWindow(pszClassName,NULL);
+
+HWND FindWindowEx(hwndParent,hwndChildAfter,pszClassName,pszWindowName);
+
+HWND GetWindow(hWnd,uCmd);
+     GetWindow(hWnd,GW_CHILD);
+
+//模拟左键单击
+::PostMessage(hWnd,WM_LBUTTONDOWN,MK_LBUTTON,0);//模拟左键按下
+::PostMessage(hWnd,WM_LBUTTONUP,0,0);//模拟左键释放
+
+MMRESULT mixerOpen(phmx,uMxId,pCallback,pInstance,fdwOpen);
+         mixerOpen(&hmx,0,NULL,NULL,MIXER_OBJECTF_MIXER);
+
+MMRESULT mixerGetLineInfo(hmx,pmxl,fdwInfo);
+         mixerGetLineInfo(hmx,&mxl,MIXER_GETLINEINFOF_COMPONENTTYPE);
+         
+MMRESULT mixerGetLineControls(hmx,pmxlc,fdwControls);
+mixerGetLineControls(hmx,&mxlc,MIXER_GETLINECONTROLSF_ONEBYTYPE);
+
+MMRESULT mixerGetControlDetails(hmx,pmxcd,fdwDetails);
+         mixerGetControlDetails(hmx,&mxcd,MIXER_OBJECTF_MIXER);
+         
+MMRESULT mixerGetControlDetails(hmx,pmxcd,fdwDetails);
+         mixerGetControlDetails(hmx,&mxcd,MIXER_OBJECTF_MIXER);
+
+
+
+BOOL CopyFile(pExistingFileName,pNewFileName,bFailIfExists);
+
+HMODULE GetModuleHandle(pModuleName);
+HRSRC FindResource(hModule,pName,pType);
+HGLOBAL LoadResource(hModule,hResInfo);
+PVOID LockResource(hResData);
+DWORD SizeofResource(hModule,hResInfo);
+BOOL FreeResource(HGLOBAL hglbResource);
+BOOL DeleteFile(pFileName);
+
+HANDLE CreateFile(pFileName,dwDesiredAccess,dwShareMode,pSecurityAttributes,
+                     dwCreationDisposition,dwFlagsAndAttributes,hTemplateFile);
+       CreateFile(pFileName,GENERIC_WRITE,FILE_SHARE_READ,NULL,CREATE_ALWAYS,
+                                                   FILE_ATTRIBUTE_HIDDEN,NULL);
+
+
+HANDLE GetCurrentProcess(void);
+
+LPVOID VirtualAllocEx(hProcess,pAddress,dwSize,flAllocationType,flProtect);
+       VirtualAllocEx(hProcess,NULL,4096,MEM_COMMIT,PAGE_EXECUTE_READWRITE);
+
+BOOL VirtualFreeEx(hProcess,pAddress,dwSize,dwFreeType);
+     VirtualFreeEx(hProcess,pAddress,0,MEM_RELEASE);
+
+HGLOBAL GlobalAlloc(uFlags,dwBytes);
+GlobalAlloc(GMEM_FIXED,0x10000);
+
+LPVOID GlobalLock(hMem);
+
+BOOL GlobalUnlock(hMem);
+
+HGLOBAL WINAPI GlobalFree(hMem);
+
+BOOL VirtualProtectEx(hProcess,pAddress,dwSize,flNewProtect,pflOldProtect);
+
+BOOL ReadProcessMemory(hProcess,pBaseAddress,pBuffer,uSize,puNumberOfBytesRead);
+
+BOOL WriteProcessMemory(hProcess,pBaseAddress,pBuffer,uSize,puNumberOfBytesRead);
+
+
+
+DWORD GetTempPath(nBufferLength,pBuffer);
+
+
+
+int WideCharToMultiByte(uCodePage,dwFlags,pWideCharStr,cchWideChar,
+                     pMultiByteStr,cbMultiByte,pDefaultChar,pbUsedDefaultChar);
+    WideCharToMultiByte(CP_ACP,0,pWideCharStr,-1,NULL,0,NULL,NULL);
+    WideCharToMultiByte(CP_ACP,0,pWideCharStr,-1,pMultiByteStr,cbMultiByte,
+                                                                    NULL,NULL);
+                                                                    
+int MultiByteToWideChar(uCodePage,dwFlags,pMultiByteStr,cbMultiByte,
+                                                       pWideCharStr,cbWideChar);
+    MultiByteToWideChar(CP_UTF8,0,pMultiByteStr,-1,NULL,0);
+    MultiByteToWideChar(CP_UTF8,0,pMultiByteStr,-1,pWideCharStr,cchWideChar);
+
+
+
+HINTERNET InternetOpen(pszAgent,dwAccessType,pszProxy,pszProxyBypass,dwFlags);
+          InternetOpen(pszAgent,INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0U);
+
+HINTERNET InternetOpenUrl(hInternetSession,pszUrl,pszHeaders,uHeadersLength,
+                                                             uFlags, uContext);
+          InternetOpenUrl(hInternetSession,pszUrl,NULL,0U,INTERNET_FLAG_RELOAD |
+                                                   INTERNET_FLAG_DONT_CACHE,0U);
+                                                   
+BOOL InternetReadFile(hFile,pBuffer,uNumberOfBytesToRead, puNumberOfBytesRead);
+
+
+
+char *_strlwr(char * str);//将字符串中的大写字母改为小写字母，其余不变
+char *_strupr(char * str);//将字符串中的小写字母改为大写字母，其余不变
+
+
+
+HANDLE CreateMutex(psa, bInitialOwner, pszName);
+       CreateMutex(NULL, FALSE, pszName);
+
+
+
+BOOL PathFileExists(pszPath);
+
+
+
+LPTSTR GetCommandLine(VOID);
+
+
+
+void OutputDebugString(pszOutputString);
+
+
+
+UINT WinExec(pszCmdLine,uCmdShow);
+
+
+
+HRESULT URLDownloadToCacheFile(pUnkcaller,pszURL,pszFileName,cchFileName,
+                                                               uReserved,pBSC);
+        URLDownloadToCacheFile(NULL,pszURL,pszFileName,cchFileName,0,NULL);
+
+
+
+void GetLocalTime(pSystemTime);
+BOOL SetLocalTime(pSystemTime);
+
+
+
+BOOL EnumWindows(pEnumFunc,lParam);
+
+
+
+SC_HANDLE OpenSCManager(pszMachineName,pszDatabaseName,uDesiredAccess);
+          OpenSCManager(NULL,NULL,SC_MANAGER_ALL_ACCESS);
+
+SC_HANDLE WINAPI OpenService(hSCManager,pszServiceName,uDesiredAccess);
+                 OpenService(hSCManager,pszServiceName,SERVICE_ALL_ACCESS);
+
+SC_HANDLE CreateService(hSCManager,pszServiceName,pszDisplayName,
+    dwDesiredAccess,dwServiceType,dwStartType,dwErrorControl,pszBinaryPathName,
+          pLoadOrderGroup,pdwTagId,pDependencies,pszServiceStartName,pPassword);
+          CreateService(hSCManager,pszServiceName,pszDisplayName,
+               SERVICE_ALL_ACCESS,SERVICE_WIN32_OWN_PROCESS,SERVICE_AUTO_START,
+              SERVICE_ERROR_NORMAL,pszBinaryPathName,NULL,NULL,NULL,NULL,NULL);
+
+SC_HANDLE WINAPI OpenService(hSCManager, pszServiceName, dwDesiredAccess);
+
+
+BOOL StartService(hService,dwNumServiceArgs,pServiceArgVectors);
+     StartService(hService,0,NULL);
+
+
+
+线程同步：
+互锁函数：
+InterlockedExchangeAdd
+InterlockedExchange
+InterlockedExchangePointer
+InterlockedCompareExchange
+InterlockedCompareExchangePointer
+InterlockedIncrement
+InterlockedDecrement
+
+InitializeCriticalSection
+InitializeCriticalSectionAndSpinCount
+EnterCriticalSection
+TryEnterCriticalSection
+LeaveCriticalSection
+DeleteCriticalSection
+
+
+
+DWORD WaitForSingleObject(hHandle,dwMilliseconds);
+      WaitForSingleObject(hHandle,INFINITE);
+      
+DWORD WaitForMultipleObjects(nCount,pHandles,bWaitAll,dwMilliseconds);
+      WaitForMultipleObjects(nCount,pHandles,TRUE,INFINITE);
+
+HANDLE CreateEvent(pSecurityAttributes,bManualReset,bInitialState,pszName);
+       CreateEvent(NULL,FALSE,FALSE,pszName);
+
+HANDLE OpenEvent(dwDesiredAccess,bInheritable,pName);
+       OpenEvent(EVENT_ALL_ACCESS,FALSE,pName);
+
+BOOL SetEvent(hEvent);
+BOOL ResetEvent(hEvent);
+
+
+CreateWaitableTimer
+SetWaitableTimer
+CancelWaitableTimer
+
+
+HANDLE CreateSemaphore(psa, lInitialCount, lMaximumCount, pszName);
+       CreateSemaphore(NULL, 0, lMaximumCount, NULL);
+
+BOOL ReleaseSemaphore(hSemaphore, lReleaseCount, pPreviousCount);
+     ReleaseSemaphore(hSemaphore, lReleaseCount, NULL);
+
+
+HANDLE CreateMutex(psa, bInitialOwner, pszName);
+       CreateMutex(NULL, FALSE, NULL);
+
+BOOL ReleaseMutex(hMutex);
+
+
+
+插入DLL：
+AppInit_DLLs
+全局钩子
+远线程
+特洛伊DLL
+
+
+
+struct sockaddr_in {
+        short   sin_family;
+        u_short sin_port;
+        struct  in_addr sin_addr;
+        char    sin_zero[8];
+};
+
+struct in_addr
+{  union {
+    struct {
+        u_char s_b1,s_b2,s_b3,s_b4;
+    } S_un_b;
+    struct {
+        u_short s_w1,s_w2;
+    } S_un_w;
+    u_long S_addr;  } S_un;
+};
+
+hton ntoh s l
+
+inet_addr inet_ntoa
+
+int WSAStartup(wVersionRequested, pWSAData);
+    WSAStartup(MAKEWORD(2,2), &wsaData);
+int WSACleanup(void);
+
+SOCKET socket(af, type, protocol);
+       socket(AF_INET, SOCK_STREAM, 0);
+int closesocket(s);
+
+int bind(s, &addr, addrlen);
+    bind(s, (SOCKADDR *)&addr, sizeof(addr);
+int listen(s, backlog);
+
+SOCKET accept(s, &addr, &addrlen);
+SOCKET connect(s, &addr, addrlen);
+
+int send(s, buf, len, flags);
+int recv(s, buf, len, flags);
+int sendto(s, buf, len, flags, &to, tolen);
+int recvfrom(s, buf, len, flags, &from, &fromlen);
+
+
+DWORD GetFileAttributes(PCTSTR pszFileName);
+      返回：INVALID_FILE_ATTRIBUTES，FILE_ATTRIBUTE_DIRECTORY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

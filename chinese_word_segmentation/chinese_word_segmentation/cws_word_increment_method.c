@@ -40,16 +40,24 @@ struct cws_hit_info_t {
         }*positions;       /**< 存放那个关键词出现的位置 */
 };
 
+/** @see cws_forward_index_t */
+typedef struct cws_forward_index_t cws_forward_index_t;
+
+/** 正排索引的结构定义 */
+struct cws_forward_index_t {
+        unsigned int doc_id;       /**< 一个文档的编号 */
+        struct {
+                unsigned int word_id;
+                cws_hit_info_t *hits;
+        };
+};
 
 /** @see cws_dict_node_t */
 typedef struct cws_dict_node_t cws_dict_node_t;
 
 /** 字典树的一个节点 */
 struct cws_dict_node_t {
-        struct {
-                bool isWord;    /**< 从树根到本节点是否构成一个单词 */
-        }attributes;                                            
-        cws_hit_info_t *hit_info;                             /**< 命中信息 */
+        unsigned int word_id;    /**< 单词的编号，-1 表示是无效ID，即从第一层到本层的字节还不构成一个单词 */
         cws_dict_node_t *children[CHILDREN_BYTES_COUNT];         /**< 孩子节点 */
 };
 

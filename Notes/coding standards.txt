@@ -1,0 +1,124 @@
+Code Conventions
+
+应该使用"#define"或enum常量，不得在代码中使用硬编码的常量（即“魔幻数”）。
+禁止include .c文件。
+所有跟条件语句相关(if,while)的代码都要用"{"和"}"括起来，即使只有一条语句。
+定义结构体类型要用typedef。
+Example:
+
+struct A	// Violation - no typedef
+{
+    int i;   
+};
+
+
+Repair:
+
+typedef struct A // OK
+{
+	int i;   
+} A_t;
+switch语句一定要带有default分支。
+条件表达式应该显式的使用逻辑比较操作。
+Example:
+void foo() 
+{
+   int isvisible = 1;	
+   if (isvisible) // Violation
+   {
+      ;
+   }
+   
+   if (!isvisible) // Violation
+   {
+      ;
+   }
+ }
+
+Repair:
+void foo() 
+{
+   int isvisible = 1;	
+   if (isvisible == 1)  // OK
+   {
+      ;
+   }
+   
+   if (isvisible != 1) // OK
+   {
+      ;
+   }
+}
+数组的元素只能通过[]来访问。
+Example:
+void foo()
+{    
+     int array[2];	 
+     *(array+1) = 0; //Violation
+     *array = 0; //Violation              
+}
+
+Repair:
+void foo()
+{    
+     int array[2];	 
+     array[1] = 0; //OK         
+}
+&&, || 和 sizeof 右边的操作数不应有副作用。
+禁止switch后只有一条case语句（一般三个以上分支才用switch）。
+禁止使用?:运算符（）。
+位运算符，比较运算符，逻辑运算符，逗号运算符因该是const方法。
+Example:
+
+class A {
+public:
+    A& operator^( int x );  // Violation
+    A& operator==( int x ); // Violation
+    A& operator&&( int x ); // Violation
+    A& operator,( int x );  // Violation
+};
+
+
+Repair:
+
+class A_ {
+public:
+    A& operator^( int x ) const;  // OK
+    A& operator==( int x ) const; // OK
+    A& operator&&( int x ) const; // OK
+    A& operator,( int x ) const;  // OK
+};
+
+类型转换，->，()，[]运算符应该是const方法。
+Example:
+
+class A {
+public:
+    A& operator()( int x ); // Violation
+    A& operator[]( int x ); // Violation
+    A& operator->( int x ); // Violation
+    operator int( );        // Violation
+};
+
+
+Repair:
+
+class A {
+public:
+    A& operator()( int x ) const; // OK
+    A& operator[]( int x ) const; // OK
+    A& operator->( int x ) const; // OK
+    operator int( ) const;        // OK
+};
+
+尽可能的使用const。
+当数组作为形参时不要指明第一维的大小。
+不要把构造函数和析构函数定义成inline的。
+struct结构体不应有成员函数（即用纯C方式使用struct）。
+
+MISRA 2004
+
+
+
+
+
