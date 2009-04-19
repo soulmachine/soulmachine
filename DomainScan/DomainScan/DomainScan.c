@@ -114,7 +114,7 @@ int ds_initialize(const char *dbname, sqlite3 **db)
         }
 
 
-        //创建一个表,如果该表存在，则不创建
+        //创建 domain 表
         sqlite3_prepare_v2(*db, "CREATE TABLE Domain(URL VARCHAR(32) PRIMARY "
                 "KEY, Status INTEGER, CreationDate VARCHAR(16), ExpirationDate "
 				"VARCHAR(16), LastUpdateDate VARCHAR(16), QueryDate "
@@ -136,6 +136,29 @@ int ds_initialize(const char *dbname, sqlite3 **db)
                         goto sqlite3_step_failed;
                 }
         }
+
+		sqlite3_finalize(stmt);
+
+		//创建 twitter 表
+		sqlite3_prepare_v2(*db, "CREATE TABLE Twitter(Username VARCHAR(16) "
+			"PRIMARY KEY, Name VARCHAR(16), Location VARCHAR(32), Web VARCHAR"
+			"(128), Bio VARCHAR(160), Following INTEGER, Followers INTERGER, "
+			"Updates INTEGER);",
+			-1, &stmt, &tail) ;
+		if(SQLITE_OK != rc){
+			debug_printf("%d: sqlite3_prepare_v2() failed!\n", __LINE__);
+			debug_printf("%d:\t%s\n", __LINE__, sqlite3_errmsg(*db));
+			goto sqlite3_prepare_v2_failed;
+		}
+		rc = sqlite3_step(stmt);
+		if(SQLITE_DONE != rc){
+			if(NULL == strstr(sqlite3_errmsg(*db), "already exists")) {
+				// table xxx already exists
+				debug_printf("%d: sqlite3_step() failed!\n", __LINE__);
+				debug_printf("%d: %s\n", __LINE__, sqlite3_errmsg(*db));
+				goto sqlite3_step_failed;
+			}
+		}
 
         rc = DS_OK;
 sqlite3_step_failed:
